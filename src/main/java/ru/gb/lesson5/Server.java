@@ -31,7 +31,7 @@ public class Server {
         final long clientId = clientIdCounter++;
 
         SocketWrapper wrapper = new SocketWrapper(clientId, client);
-        System.out.println("Подключился новый клиент[" + wrapper + "]");
+        System.out.println("Подключился новый клиент[" + wrapper.toString() + "]");
         clients.put(clientId, wrapper);
 
         new Thread(() -> {
@@ -48,13 +48,24 @@ public class Server {
               }
 
               // формат сообщения: "цифра сообщение"
-              long destinationId = Long.parseLong(clientInput.substring(0, 1));
-              SocketWrapper destination = clients.get(destinationId);
-              destination.getOutput().println(clientInput);
+              String firstSymbol = clientInput.substring(0, 1);
+              if (firstSymbol.startsWith("@")) {
+                long destinationId = Long.parseLong(clientInput.strip().split(" ")[0].replace("@", ""));
+                if (clients.containsKey(destinationId)) {
+                  clients.get(destinationId).getOutput().println(client + " " + clientInput);
+                } else {
+                  output.println("Клиент с id " + destinationId + " не найден");
+                }
+              } else {
+                clients.values().forEach(it -> it.getOutput().println(client + " " + clientInput));
+              }
+
             }
           }
         }).start();
       }
+    } catch (Exception e) {
+      throw new RuntimeException(e.getMessage(), e);
     }
   }
 

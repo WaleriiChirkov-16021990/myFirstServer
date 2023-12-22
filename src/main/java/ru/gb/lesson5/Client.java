@@ -37,7 +37,6 @@ public class Client {
         throw new RuntimeException(e);
       }
     }).start();
-
   }
 }
 
